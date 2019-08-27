@@ -31,3 +31,19 @@ roslaunch mbot_gazebo view_mbot_with_sensor_gazebo_automobile.launch
 
 <div align=center><img width="550" height="250" src="./sensors.gif"/></div>
 
+2. voice-control car
+Start car simulation
+```
+source mobile-robot-sim/devel/setup.bash
+roslaunch mbot_gazebo view_mbot_gazebo_empty_world_automobile.launch 
+```
+Start the voice control node
+```
+source mobile-robot-sim/devel/setup.bash
+roslaunch robot_voice voice_control_automobile.launch 
+```
+Wake up the voice-control node
+```
+source mobile-robot-sim/devel/setup.bash
+rostopic pub /voiceWakeup std_msgs/String "data: '1'" 
+```
