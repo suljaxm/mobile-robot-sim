@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<robot name="arm" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:include filename="$(find mbot_description)/urdf/mbot_base_gazebo_automobile.xacro" />
+    <xacro:include filename="$(find mbot_description)/urdf/sensors/camera_gazebo.xacro" />
+    <xacro:include filename="$(find mbot_description)/urdf/sensors/lidar_gazebo.xacro" />
+
+    <xacro:property name="camera_offset_x" value="0.17" />
+    <xacro:property name="camera_offset_y" value="-0.05" />
+    <xacro:property name="camera_offset_z" value="0.10" />
+
+    <xacro:property name="lidar_offset_x" value="0" />
+    <xacro:property name="lidar_offset_y" value="0" />
+    <xacro:property name="lidar_offset_z" value="0.105" />
+
+    <!-- Camera -->
+    <joint name="left_camera_joint" type="fixed">
+        <origin xyz="${camera_offset_x} ${camera_offset_y} ${camera_offset_z}" rpy="0 0 0" />
+        <parent link="base_link"/>
+        <child link="left_camera_link"/>
+    </joint>
+
+    <joint name="right_camera_joint" type="fixed">
+        <origin xyz="${camera_offset_x} ${-camera_offset_y} ${camera_offset_z}" rpy="0 0 0" />
+        <parent link="base_link"/>
+        <child link="right_camera_link"/>
+    </joint>
+
+    <xacro:usb_camera prefix="left_camera"/>
+    <xacro:usb_camera prefix="right_camera"/>
+
+    <!-- Lidar-->
+    <joint name="lidar_joint" type="fixed">
+        <origin xyz="${lidar_offset_x} ${lidar_offset_y} ${lidar_offset_z}" rpy="0 0 0" />
+        <parent link="base_link"/>
+        <child link="laser_link"/>
+    </joint>
+
+    <xacro:rplidar prefix="laser"/>
+
+    <mbot_base_gazebo/>
+
+</robot>

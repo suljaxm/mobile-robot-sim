@@ -1,0 +1,180 @@
+<?xml version="1.0"?>
+<robot name="mbot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <!-- PROPERTY LIST -->
+    <xacro:property name="M_PI" value="3.1415926"/>
+    <xacro:property name="base_mass"   value="20" /> 
+    <xacro:property name="base_radius" value="0.20"/>
+
+    <xacro:property name="base_length" value="0.40"/>
+    <xacro:property name="base_width" value="0.20"/>
+    <xacro:property name="base_height" value="0.16"/>
+
+    <xacro:property name="wheel_mass"   value="2" />
+    <xacro:property name="wheel_radius" value="0.06"/>
+    <xacro:property name="wheel_length" value="0.025"/>
+
+    <xacro:property name="wheel_joint_x" value="0.1"/>
+    <xacro:property name="wheel_joint_y" value="0.1"/>
+    <xacro:property name="wheel_joint_z" value="0.08"/>
+
+    <xacro:property name="caster_radius"  value="0.015"/> <!-- wheel_radius - ( base_length/2 - wheel_joint_z) -->
+
+    <xacro:property name="update_rate" value="100.0"/> <!-- controller-->
+
+
+    <!-- Defining the colors used in this robot -->
+    <material name="yellow">
+        <color rgba="1 0.4 0 1"/>
+    </material>
+    <material name="black">
+        <color rgba="0 0 0 0.95"/>
+    </material>
+    <material name="gray">
+        <color rgba="0.75 0.75 0.75 1"/>
+    </material>
+    
+    <!-- Macro for inertia matrix -->
+    <xacro:macro name="sphere_inertial_matrix" params="m r">
+        <inertial>
+            <mass value="${m}" />
+            <inertia ixx="${2*m*r*r/5}" ixy="0" ixz="0"
+                iyy="${2*m*r*r/5}" iyz="0" 
+                izz="${2*m*r*r/5}" />
+        </inertial>
+    </xacro:macro>
+
+    <xacro:macro name="cylinder_inertial_matrix" params="m r h">
+        <inertial>
+            <mass value="${m}" />
+            <inertia ixx="${m*(3*r*r+h*h)/12}" ixy = "0" ixz = "0"
+                iyy="${m*(3*r*r+h*h)/12}" iyz = "0"
+                izz="${m*r*r/2}" /> 
+        </inertial>
+    </xacro:macro>
+
+    <!-- Macro for robot wheel -->
+    <xacro:macro name="wheel" params="prefix reflect orientation">
+        <joint name="${prefix}_wheel_joint" type="continuous">
+            <origin xyz="${orientation*wheel_joint_x} ${reflect*wheel_joint_y} ${-wheel_joint_z}" rpy="0 0 0"/>
+            <parent link="base_link"/>
+            <child link="${prefix}_wheel_link"/>
+            <axis xyz="0 1 0"/>
+        </joint>
+
+        <link name="${prefix}_wheel_link">
+            <visual>
+                <origin xyz="0 0 0" rpy="${M_PI/2} 0 0" />
+                <geometry>
+                    <cylinder radius="${wheel_radius}" length = "${wheel_length}"/>
+                </geometry>
+                <material name="gray" />
+            </visual>
+            <collision>
+                <origin xyz="0 0 0" rpy="${M_PI/2} 0 0" />
+                <geometry>
+                    <cylinder radius="${wheel_radius}" length = "${wheel_length}"/>
+                </geometry>
+            </collision>
+            <cylinder_inertial_matrix  m="${wheel_mass}" r="${wheel_radius}" h="${wheel_length}" />
+        </link>
+
+        <gazebo reference="${prefix}_wheel_link">
+            <material>Gazebo/Gray</material>
+        </gazebo>
+
+        <!-- Transmission is important to link the joints and the controller -->
+        <transmission name="${prefix}_wheel_joint_trans">
+            <type>transmission_interface/SimpleTransmission</type>
+            <joint name="${prefix}_wheel_joint" >
+                <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+            </joint>
+            <actuator name="${prefix}_wheel_joint_motor">
+                <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+                <mechanicalReduction>1</mechanicalReduction>
+            </actuator>
+        </transmission>
+    </xacro:macro>
+
+
+    <xacro:macro name="mbot_base_gazebo">
+        <link name="base_footprint">
+            <visual>
+                <origin xyz="0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <box size="0.001 0.001 0.001" />
+                </geometry>
+            </visual>
+        </link>
+        <gazebo reference="base_footprint">
+            <turnGravityOff>false</turnGravityOff>
+        </gazebo>
+
+        <joint name="base_footprint_joint" type="fixed">
+            <origin xyz="0 0 ${base_length/2 + caster_radius*2}" rpy="0 0 0" />        
+            <parent link="base_footprint"/>
+            <child link="base_link" />
+        </joint>
+
+        <link name="base_link">
+            <visual>
+                <origin xyz=" 0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <box size="${base_length} ${base_width} ${base_height}"/>
+                </geometry>
+                <material name="yellow" />
+            </visual>
+            <collision>
+                <origin xyz=" 0 0 0" rpy="0 0 0" />
+                <geometry>
+                    <box size="${base_length} ${base_width} ${base_height}"/>
+                </geometry>
+            </collision>   
+            <cylinder_inertial_matrix  m="${base_mass}" r="${base_radius}" h="${base_length}" />
+        </link>
+
+        <gazebo reference="base_link">
+            <material>Gazebo/Blue</material>
+        </gazebo>
+
+        <wheel prefix="back_left"  reflect="-1" orientation="-1"/>
+        <wheel prefix="back_right" reflect="1"  orientation="-1"/>
+        <wheel prefix="front_left"  reflect="-1" orientation="1"/>
+        <wheel prefix="front_right" reflect="1"  orientation="1" />
+
+        <!-- controller -->
+        <gazebo>
+            <plugin name="skid_steer_drive_controller" 
+                    filename="libgazebo_ros_skid_steer_drive.so">
+                <rosDebugLevel>Debug</rosDebugLevel>
+                <publishWheelTF>true</publishWheelTF>
+                <robotNamespace>/</robotNamespace>
+                <publishTf>1</publishTf>
+                <publishWheelJointState>true</publishWheelJointState>
+                <alwaysOn>true</alwaysOn>
+                <updateRate>${update_rate}</updateRate>
+                <legacyMode>true</legacyMode>
+
+                <leftFrontJoint>front_left_wheel_joint</leftFrontJoint>
+                <rightFrontJoint>front_right_wheel_joint</rightFrontJoint>
+                <leftRearJoint>back_left_wheel_joint</leftRearJoint>
+                <rightRearJoint>back_right_wheel_joint</rightRearJoint>
+
+                <covariance_x>0.000100</covariance_x>
+                <covariance_y>0.000100</covariance_y>
+                <covariance_yaw>0.010000</covariance_yaw>
+
+                <wheelSeparation>${wheel_joint_y*2}</wheelSeparation>
+                <wheelDiameter>${2*wheel_radius}</wheelDiameter>
+                <broadcastTF>true</broadcastTF>          <!--need turn off-->
+                <torque>30</torque>                       <!--'wheelTorque' is renamed 'torque'-->
+                <wheelAcceleration>1.8</wheelAcceleration>
+                <commandTopic>cmd_vel</commandTopic>                <!--topicName-->
+                <odometryFrame>odom</odometryFrame> 
+                <odometryTopic>odom</odometryTopic> 
+                <robotBaseFrame>base_footprint</robotBaseFrame>
+            </plugin>
+        </gazebo> 
+    </xacro:macro>
+
+</robot>
