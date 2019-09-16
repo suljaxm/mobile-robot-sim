@@ -14,7 +14,7 @@ Clone the project repository: `git clone https://github.com/suljaxm/mobile-robot
 ## TODO
 - [x] keyboard control
 - [x] voice control
-- [ ] object detection
+- [x] object detection 
 - [ ] virtual binocular calibration
 - [x] two wheeled robot navigation
 - [ ] four wheeled robot navigation
@@ -46,6 +46,12 @@ roslaunch mbot_gazebo view_mbot_with_sensor_gazebo_automobile.launch
 <div align=center><img width="350" height="150" src="./images/sensors.gif"/></div>
 
 - **Voice-Control Car**
+	- **dependencies(xfyun_sdk)**
+	```
+	sudo cp libmsc.so /usr/lib
+	sudo apt install sox
+	sudo apt install libsox-fmt-all
+	```
 	- start car simulation
 	```
 	roslaunch mbot_gazebo view_mbot_gazebo_empty_world_automobile.launch 
@@ -98,3 +104,17 @@ roslaunch mbot_gazebo view_mbot_with_sensor_gazebo_automobile.launch
 	rosrun mbot_navigation exploring_random.py 
 	```
 	<div align=center><img width="300" height="200" src="./images/slam_nav.gif"/></div>
+	
+- **SLAM && Object-Find**
+	- start sweeping robot simulation
+	```
+	roslaunch mbot_gazebo mbot_maze_gazebo.launch
+	```
+	- start the slam node
+	```
+	roslaunch mbot_navigation exploring_slam_demo.launch
+	```
+	- start the object-find node
+	```
+	roslaunch mbot_vision find_target.launch
+	```
