@@ -22,7 +22,7 @@ class image_converter:
         self.image_pub = rospy.Publisher("object_detect_image", Image, queue_size=1)
         self.target_pub = rospy.Publisher("object_detect_pose", Pose,  queue_size=1)
         self.bridge = CvBridge()
-        self.image_sub = rospy.Subscriber("/camera/image_raw", Image, self.callback)
+        self.image_sub = rospy.Subscriber("/camera_center/camera/image_raw", Image, self.callback)
 
     def callback(self,data):
         # 使用cv_bridge将ROS的图像数据转换成OpenCV的图像格式
