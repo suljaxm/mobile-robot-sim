@@ -46,12 +46,13 @@ roslaunch mbot_gazebo view_mbot_with_sensor_gazebo_automobile.launch
 <div align=center><img width="350" height="150" src="./images/sensors.gif"/></div>
 
 - **Voice-Control Car**
-	- **dependencies(xfyun_sdk)**
+	- **dependencies([xfyun_sdk](https://drive.google.com/open?id=1d6e1gza5FdAt0VIn6KjHHYpoY3LyiPzj))**
 	```
 	sudo cp libmsc.so /usr/lib
 	sudo apt install sox
 	sudo apt install libsox-fmt-all
 	```
+	   For details on how to use the sdk, see https://www.xfyun.cn.
 	- start car simulation
 	```
 	roslaunch mbot_gazebo view_mbot_gazebo_empty_world_automobile.launch 
