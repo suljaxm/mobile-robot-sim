@@ -106,7 +106,8 @@ roslaunch mbot_gazebo view_mbot_with_sensor_gazebo_automobile.launch
 	```
 	<div align=center><img width="300" height="200" src="./images/slam_nav.gif"/></div>
 	
-- **SLAM && Object-Find**
+- **Object-Find**
+	1. **SLAM**
 	- start sweeping robot simulation
 	```
 	roslaunch mbot_gazebo mbot_maze_gazebo.launch
@@ -118,4 +119,17 @@ roslaunch mbot_gazebo view_mbot_with_sensor_gazebo_automobile.launch
 	- start the object-find node
 	```
 	roslaunch mbot_vision find_target.launch
+	```
+	2. **Navigation**
+	- start sweeping robot simulation
+	```
+	roslaunch mbot_gazebo mbot_maze_gazebo.launch
+	```
+	- start the navigation node
+	```
+	roslaunch mbot_navigation nav_maze_demo.launch
+	```
+	- start the object-find node
+	```
+	roslaunch mbot_vision find_target_pro.launch
 	```
